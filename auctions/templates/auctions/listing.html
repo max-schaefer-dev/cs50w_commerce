@@ -1,15 +1,15 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2>Listing {{ listing.title }}</h2>
+<h2>Listing {{ listing|get_item:"title" }}</h2>
 <div>
-    <img src="{{ listing.imageURL }}">
+    <img src="{{ listing|get_item:"imageURL" }}">
 </div>
 <div>
-    <p>${{ listing.startingBid }}</p>
+    <p>{{ listing|get_item:"startingBid" }}</p>
 </div>
 {% if user.is_authenticated %}
-<form action="{% url 'commerce:listing' %}" method="post">
+<form action="{% url 'commerce:listing' listing|get_item:"title"%}" method="post">
     {% csrf_token %}
     {{ sendBid }}
     <input id="submit" type="submit" value="Place Bid" name="bid">
@@ -19,7 +19,7 @@
     <h4>Details</h4>
     <ul>
         <li>Listed by NAME</li>
-        <li>Category: {{ listing.category }}</li>
+        <li>Category: {{ listing|get_item:"category" }}</li>
     </ul>
 </div>
 {% endblock %}

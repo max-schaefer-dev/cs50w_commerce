@@ -28,6 +28,7 @@ input[type=submit], #id_startingBid{
     display: flex;
     flex-direction: row;
     height: 350px;
+    margin-bottom: 10px;
 }
 #imgOuter, #descriptionOuter{
     display:flex;

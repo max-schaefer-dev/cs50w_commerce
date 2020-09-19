@@ -3,6 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+import re
 
 from .models import User, Listing, CreateListing, SendBid, Bid
 
@@ -24,7 +25,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return HttpResponseRedirect(reverse("commerce:index"))
         else:
             return render(request, "auctions/login.html", {
                 "message": "Invalid username and/or password."
@@ -35,7 +36,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("commerce:index"))
 
 
 def register(request):
@@ -60,7 +61,7 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        return HttpResponseRedirect(reverse("commerce:index"))
     else:
         return render(request, "auctions/register.html")
 
@@ -72,6 +73,8 @@ def create_listing(request):
         description = request.POST["description"]
         startingBid = request.POST["startingBid"]
         imageURL = request.POST["imageURL"]
+        if imageURL == "":
+            imageURL = "https://lh3.googleusercontent.com/proxy/X0JRb9qkKE0HD8VgagrefkLSuNn13NVvYcHmtCu7IROEBmGEcUmD9B_D_Mk_lE6idJQqfHfgd9CAr-x7HZk-3a1GrqXAMwDuKmKm75bB9zX5Fw"
         category = request.POST["category"]
         ls = Listing(title=title, description=description,
                      startingBid=startingBid, imageURL=imageURL, category=category)
@@ -82,7 +85,7 @@ def create_listing(request):
     })
 
 
-def listing(request, lTitle):
+def listing(request, listingTitle):
     """
     if request.method == "POST":
         print(request.POST)
@@ -96,7 +99,24 @@ def listing(request, lTitle):
         ls.save()
         """
 
+    getObject = Listing.objects.filter(title=f'{listingTitle}')
+    title = re.findall("title:(\\w+)", str(getObject[0]))[0]
+    description = re.findall("description:(\\w+)", str(getObject[0]))[0]
+    startingBid = re.findall("startingBid:(\\w+)", str(getObject[0]))[0]
+    category = re.findall("category:(\\w+)", str(getObject[0]))[0]
+    try:
+        imageURL = re.findall("imageURL:(\\w+)", str(getObject[0]))[0]
+    except:
+        imageURL = "https://lh3.googleusercontent.com/proxy/X0JRb9qkKE0HD8VgagrefkLSuNn13NVvYcHmtCu7IROEBmGEcUmD9B_D_Mk_lE6idJQqfHfgd9CAr-x7HZk-3a1GrqXAMwDuKmKm75bB9zX5Fw"
+
+    listingDetails = {
+        "title": title,
+        "description": description,
+        "startingBid": startingBid,
+        "imageURL": imageURL,
+        "category": category
+    }
     return render(request, "auctions/listing.html", {
-        "listing": Listing.objects.filter(title=f'{lTitle}'),
+        "listing": listingDetails,
         "sendBid": SendBid
     })

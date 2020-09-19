@@ -9,7 +9,7 @@ urlpatterns = [
     path("logout", views.logout_view, name="logout"),
     path("register", views.register, name="register"),
     path("create_listing", views.create_listing, name="create_listing"),
-    path("listing/<lTitle>", views.listing, name="listing"),
+    path("listing/<listingTitle>", views.listing, name="listing"),
     path("categories", views.create_listing, name="categories"),
     path("watchlist", views.create_listing, name="watchlist")
 ]

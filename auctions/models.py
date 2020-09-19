@@ -25,7 +25,7 @@ class Listing(models.Model):
     category = models.CharField(max_length=48)
 
     def __str__(self):
-        return f"\n{ self.title }\n{ self.imageURL }\n{ self.description }\n{ self.startingBid }\n"
+        return f"title:{ self.title } imageURL:{ self.imageURL } description:{ self.description } startingBid:{ self.startingBid } category:{ self.category }"
 
 
 class SendBid(forms.Form):
