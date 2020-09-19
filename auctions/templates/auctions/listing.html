@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2>Listing {{ listing.title }}</h2>
+<div>
+    <img src="{{ listing.imageURL }}">
+</div>
+<div>
+    <p>${{ listing.startingBid }}</p>
+</div>
+{% if user.is_authenticated %}
+<form action="{% url 'commerce:listing' %}" method="post">
+    {% csrf_token %}
+    {{ sendBid }}
+    <input id="submit" type="submit" value="Place Bid" name="bid">
+</form>
+{% endif %}
+<div>
+    <h4>Details</h4>
+    <ul>
+        <li>Listed by NAME</li>
+        <li>Category: {{ listing.category }}</li>
+    </ul>
+</div>
+{% endblock %}
