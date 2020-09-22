@@ -6,15 +6,15 @@
 <div id="listing">
     <div id="imgOuter">
         <div style="width:100%;">
-            <img src="{{ listing.imageURL }}">
+            <img src="{{ listing|get_item:"imageURL" }}">
         </div>
     </div>
     <div id="descriptionOuter">
         <div>
             <h4><a href="{% url 'commerce:listing' listing.title %}">{{ listing.title }}</a></h4>
         </div>
-        <div><b>Price:</b> ${{ listing.startingBid }}</div>
-        <div>{{ listing.description }}</div>
+        <div><b>Price:</b> ${{ listing|get_item:"bid" }}</div>
+        <div>{{ listing|get_item:"description" }}</div>
     </div>
 </div>
 {% endfor %}

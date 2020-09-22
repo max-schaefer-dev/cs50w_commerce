@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django import forms
+from django.core.exceptions import ValidationError
+from django.utils.translation import ugettext_lazy as _
 
 
 class User(AbstractUser):
@@ -23,7 +25,7 @@ class CreateListing(forms.Form):
 class Listing(models.Model):
     title = models.CharField(max_length=48)
     description = models.CharField(max_length=210)
-    startingBid = models.FloatField()
+    startingBid = models.DecimalField(max_digits=10, decimal_places=2)
     imageURL = models.CharField(max_length=300)
     category = models.CharField(max_length=48)
 
@@ -32,13 +34,20 @@ class Listing(models.Model):
 
 
 class PlaceBid(forms.Form):
-    bid = forms.IntegerField(label="",
-                             widget=forms.TextInput(attrs={'placeholder': 'Bid', 'class': 'form-control'}))
+    bid = forms.FloatField(label="",
+                           widget=forms.TextInput(attrs={'placeholder': 'Bid', 'class': 'form-control', 'name': 'bid', 'step': "0.01"}))
 
 
 class Bid(models.Model):
-    placedBy = models.CharField(max_length=50)
-    placedTo = models.CharField(max_length=48)
+    placedBy = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="placedBy")
+    placedTo = models.ForeignKey(
+        Listing, on_delete=models.CASCADE, related_name="placedTo")
+    amount = models.DecimalField(
+        max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"user:{ self.placedBy } bid:{ self.amount } on:{ self.placedTo }"
 
 
 class Watchlist(models.Model):

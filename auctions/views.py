@@ -10,16 +10,45 @@ from .models import User, Listing, CreateListing, PlaceBid, Bid, Comment, Watchl
 
 def index(request):
 
-    watchlistLen = 0
+    try:
+        checkBid = Bid.objects.filter(
+            placedTo=Listing.objects.get(title=title)).order_by('-id')[0]
+        currentBid = re.findall("bid:(.+) on:", str(checkBid))[0]
+    except:
+        currentBid = 0
+
     if request.user.is_authenticated:
         # Watchlist
         current_user = request.user
         getWatchlist = Watchlist.objects.filter(user=f'{ current_user.id }')
-        watchlistLen = len(getWatchlist)
+
+    lm = []
+    ls = Listing.objects.all()
+    for listing in ls:
+        try:
+            checkBid = Bid.objects.filter(
+                placedTo=Listing.objects.get(title=listing.title)).order_by('-id')[0]
+            currentBid = checkBid.amount
+        except:
+            currentBid = 0
+
+        if float(listing.startingBid) <= float(currentBid):
+            bid = currentBid
+        else:
+            bid = listing.startingBid
+
+        la = {
+            "title": listing.title,
+            "description": listing.description,
+            "bid": bid,
+            "imageURL": listing.imageURL,
+            "category": listing.category
+        }
+        lm.append(la)
 
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all(),
-        "watchlistLen": watchlistLen
+        "listings": lm,
+        "watchlistLen": len(getWatchlist)
     })
 
 
@@ -76,13 +105,12 @@ def register(request):
 
 def create_listing(request):
     if request.method == "POST":
-        print(request.POST)
         title = request.POST["title"]
         description = request.POST["description"]
-        startingBid = request.POST["startingBid"]
+        startingBid = str(format(float(request.POST["startingBid"]), '.2f'))
         imageURL = request.POST["imageURL"]
         if imageURL == "":
-            imageURL = "https://lh3.googleusercontent.com/proxy/X0JRb9qkKE0HD8VgagrefkLSuNn13NVvYcHmtCu7IROEBmGEcUmD9B_D_Mk_lE6idJQqfHfgd9CAr-x7HZk-3a1GrqXAMwDuKmKm75bB9zX5Fw"
+            imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRJQ9xu5I_En7x6FYaQ8Mlf2QSMCg1cFAUu7w&usqp=CAU"
         category = request.POST["category"]
         ls = Listing(title=title, description=description,
                      startingBid=startingBid, imageURL=imageURL, category=category)
@@ -102,93 +130,119 @@ def create_listing(request):
 def listing(request, listingTitle):
     if request.method == "POST":
         if request.user.is_authenticated:
-            watchlistAction = request.POST["watchlistAction"]
-            print(request.POST)
-            print(watchlistAction)
             current_user = request.user
-            if watchlistAction == "add":
+
+            # if POST == Bid
+            try:
+                bidPlaced = request.POST["bid"]
+            except:
+                bidPlaced = None
+
+            if bidPlaced:
+                print(request.POST)
+                currentBid = request.POST["currentBid"]
+                if float(bidPlaced) >= float(currentBid):
+                    listing = request.POST["placedTo"]
+                    updateBid = Bid(placedBy=User.objects.get(id=current_user.id), placedTo=Listing.objects.get(
+                        title=listing), amount=bidPlaced)
+                    updateBid.save()
+                else:
+                    pass
+
+            # If POST == Update of watchlist
+            try:
+                watchlistAction = request.POST["watchlistAction"]
+            except:
+                watchlistAction = None
+
+            if watchlistAction:
                 watchlistItem = request.POST["watchlistItem"]
-                watchlistUpdate = Watchlist(
-                    user=User.objects.get(id=current_user.id), listing=Listing.objects.get(
-                        title=watchlistItem))
-                watchlistUpdate.save()
-            if watchlistAction == "remove":
-                watchlistItem = request.POST["watchlistItem"]
-                watchlistUpdate = Watchlist.objects.get(
-                    user=current_user, listing=Listing.objects.get(title=watchlistItem))
-                watchlistUpdate.delete()
+                if watchlistAction == "add":
+                    watchlistUpdate = Watchlist(
+                        user=User.objects.get(id=current_user.id), listing=Listing.objects.get(
+                            title=watchlistItem))
+                    watchlistUpdate.save()
+
+                if watchlistAction == "remove":
+                    watchlistUpdate = Watchlist.objects.get(
+                        user=current_user, listing=Listing.objects.get(title=watchlistItem))
+                    watchlistUpdate.delete()
 
     # Listing Information
-    current_user = request.user
+    onWatchlist = 0
     getObject = Listing.objects.filter(title=f'{ listingTitle }')
-    title = re.findall("title:(.+) imageURL", str(getObject[0]))[0]
-    description = re.findall(
-        "description:(.+) startingBid", str(getObject[0]), flags=re.DOTALL)[0]
-    startingBid = re.findall("startingBid:(.+) category",
-                             str(getObject[0]), flags=re.DOTALL)[0]
-    category = re.findall("category:(.+)", str(getObject[0]))[0]
+
+    # Look if there is was a bid so far
+    startingBid = getObject[0].startingBid
     try:
-        imageURL = re.findall("imageURL:(.+) description",
-                              str(getObject[0]), flags=re.DOTALL)[0]
+        checkBid = Bid.objects.filter(
+            placedTo=Listing.objects.get(title=getObject[0].title)).order_by('-id')[0]
+        currentBid = re.findall("bid:(.+) on:", str(checkBid))[0]
     except:
-        imageURL = "https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRJQ9xu5I_En7x6FYaQ8Mlf2QSMCg1cFAUu7w&usqp=CAU"
+        currentBid = 0
+
+    if float(startingBid) <= float(currentBid):
+        bid = currentBid
+    else:
+        bid = startingBid
 
     listingDetails = {
-        "title": title,
-        "description": description,
-        "startingBid": startingBid,
-        "imageURL": imageURL,
-        "category": category
+        "title": getObject[0].title,
+        "description": getObject[0].description,
+        "bid": bid,
+        "imageURL": getObject[0].imageURL,
+        "category": getObject[0].category
     }
 
-    # Watchlist
-    getWatchlist = Watchlist.objects.filter(user=f'{ current_user.id }')
-    watchlistLen = len(getWatchlist)
-    onWatchlist = 0
+    if request.user.is_authenticated:
+        current_user = request.user
+        # Check if user got a watchlist
+        getWatchlist = Watchlist.objects.filter(user=f'{ current_user.id }')
+        onWatchlist = 0
 
-    for entry in getWatchlist:
-        found = re.search(f"title:{ title }", str(entry))
-        if found:
-            onWatchlist = 1
-            break
+        for entry in getWatchlist:
+            found = re.search(f"title:{ getObject[0].title }", str(entry))
+            if found:
+                onWatchlist = 1
+                break
 
-    print(onWatchlist)
     return render(request, "auctions/listing.html", {
         "listing": listingDetails,
         "placeBid": PlaceBid,
         "watchlist": onWatchlist,
-        "watchlistLen": watchlistLen
+        "watchlistLen": len(getWatchlist)
     })
 
 
 def watchlist(request):
 
     if request.user.is_authenticated:
-        # Watchlist
-        # Listing Information
-        watchlistLen = 0
+        # Listing watchlist items
         current_user = request.user
         getWatchlist = Watchlist.objects.filter(user=f'{ current_user.id }')
-        watchlistLen = len(getWatchlist)
         watchlist = []
-        print(getWatchlist)
         for entry in getWatchlist:
-            print(entry)
+            try:
+                currentBid = Bid.objects.filter(placedTo=Listing.objects.get(
+                    title=entry.listing.title)).order_by('-id')[0].amount
+            except:
+                currentBid = 0
+
+            if entry.listing.startingBid <= currentBid:
+                bid = currentBid
+            else:
+                bid = entry.listing.startingBid
             watchlist.append(
                 {
-                    "title": re.findall("title:(.+) imageURL", str(entry))[0],
-                    "description": re.findall(
-                        "description:(.+) startingBid", str(entry), flags=re.DOTALL)[0],
-                    "startingBid": re.findall("startingBid:(.+) category",
-                                              str(entry), flags=re.DOTALL)[0],
-                    "category": re.findall("category:(.+)", str(entry))[0],
-                    "imageURL": re.findall("imageURL:(.+) description",
-                                           str(entry), flags=re.DOTALL)[0]
+                    "title": entry.listing.title,
+                    "description": entry.listing.description,
+                    "bid": bid,
+                    "category": entry.listing.category,
+                    "imageURL": entry.listing.imageURL
                 }
             )
-        print(watchlist)
 
     return render(request, "auctions/watchlist.html", {
-        "watchlistLen": watchlistLen,
+        "watchlistLen": len(getWatchlist),
         "watchlist": watchlist
     })

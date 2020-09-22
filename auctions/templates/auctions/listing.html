@@ -20,14 +20,17 @@
     <img src="{{ listing|get_item:"imageURL" }}">
 </div>
 <div>
-    <h5 style="font-weight:600">${{ listing|get_item:"startingBid" }}</h5>
+    <h5 style="font-weight:600">${{ listing|get_item:"bid" }}</h5>
 </div>
 {% if user.is_authenticated %}
 <form action="{% url 'commerce:listing' listing|get_item:"title"%}" method="post">
     <div class="form-group">
         {% csrf_token %}
-        {{ placeBid }}
-        <input id="submit" class="btn btn-primary" type="submit" value="Place Bid" name="bid">
+        {{ placeBid.bid }}
+        <input id="submit" class="btn btn-primary" type="submit" value="Place Bid">
+        <input name="placedTo" value="{{ listing|get_item:"title" }}" type="hidden">
+        <input name="currentBid" value="{{ listing|get_item:"bid" }}" type="hidden">
+        <input name="placedBy" value="{{ user.id }}" type="hidden">
     </div>
 </form>
 {% endif %}

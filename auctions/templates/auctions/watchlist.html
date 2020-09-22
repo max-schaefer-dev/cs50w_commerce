@@ -2,6 +2,7 @@
 
 {% block body %}
 <h2>Your Watchlist</h2>
+{% if watchlistLen > 0 %}
 {% for listing in watchlist %}
 <div id="listing">
     <div id="imgOuter">
@@ -13,9 +14,12 @@
         <div>
             <h4><a href="{% url 'commerce:listing' listing.title %}">{{ listing.title }}</a></h4>
         </div>
-        <div><b>Price:</b> ${{ listing.startingBid }}</div>
+        <div><b>Price:</b> ${{ listing.bid }}</div>
         <div>{{ listing.description }}</div>
     </div>
 </div>
 {% endfor %}
+{% else %}
+<h5>Nothing on your watchlist yet...</h5>
+{% endif %}
 {% endblock %}
