@@ -27,8 +27,11 @@
         <li class="nav-item">
             <a class="nav-link" href="{% url 'commerce:categories' %}">Categories</a>
         </li>
-        <li class="nav-item">
+        <li style="display:flex; flex-direction: row; align-items: center;" class="nav-item">
             <a class="nav-link" href="{% url 'commerce:watchlist' %}">Watchlist</a>
+            {% if watchlistLen > 0 %}
+            <span id="watchlistNum">{{ watchlistLen }}</span>
+            {% endif %}
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{% url 'commerce:create_listing' %}">Create Listing</a>

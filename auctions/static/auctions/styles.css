@@ -1,8 +1,8 @@
 body {
     padding: 20px;
 }
-h2{
-    font-weight:700;
+h2, h3, h4{
+    font-weight:600;
 }
 .form-control{
     width:350px;
@@ -27,21 +27,56 @@ input[type=submit], #id_startingBid{
     border-radius: 10px;
     display: flex;
     flex-direction: row;
-    height: 350px;
-    margin-bottom: 10px;
+    height: 225px;
+    margin-bottom: 20px;
 }
 #imgOuter, #descriptionOuter{
     display:flex;
+    overflow: auto;
 }
 #imgOuter{
-    width:35%;
+    width:45%;
+    text-align:center;
 }
 #imgOuter img{
-    width:100%;
     height:100%;
 }
 #descriptionOuter{
     padding: 15px;
     width:100%;
     flex-direction: column;
+}
+#addToWatchlist, #removeFromWatchlist{
+    color:#fff;
+    background-color:#666;
+    border:0;
+    border-radius:5px;
+    font-weight:700;
+    font-size:13px;
+    width: min-content;
+    padding: 0 5px;
+    margin-bottom:10px;
+}
+#removeFromWatchlist{
+    background-color: rgb(247, 157, 157);
+}
+.form-group{
+    display:flex;
+    flex-direction: column;
+}
+
+#listing_img{
+    margin-bottom:20px;
+}
+#listing_img img{
+    height:350px;
+}
+#watchlistNum{
+    background-color:#666;
+    color:#fff;
+    padding: 0 5px;
+    width: max-content;
+    margin-left:-14px;
+    line-height:initial;
+    border-radius:5px;
 }

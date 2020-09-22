@@ -1,21 +1,37 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2>Listing {{ listing|get_item:"title" }}</h2>
-<div>
+<h3>Listing: {{ listing|get_item:"title" }}</h3>
+{% if user.is_authenticated %}
+<form action="" method="post">
+    {% csrf_token %}
+    {% if watchlist == 1 %}
+    <input id="removeFromWatchlist" class="btn btn-primary" type="submit" value="Remove from Watchlist">
+    <input name="watchlistAction" value="remove" type="hidden">
+    <input name="watchlistItem" value="{{ listing|get_item:"title" }}" type="hidden">
+    {% else %}
+    <input id="addToWatchlist" class="btn btn-primary" type="submit" value="Watchlist">
+    <input name="watchlistAction" value="add" type="hidden">
+    <input name="watchlistItem" value="{{ listing|get_item:"title" }}" type="hidden">
+    {% endif %}
+</form>
+{% endif %}
+<div id="listing_img">
     <img src="{{ listing|get_item:"imageURL" }}">
 </div>
 <div>
-    <p>{{ listing|get_item:"startingBid" }}</p>
+    <h5 style="font-weight:600">${{ listing|get_item:"startingBid" }}</h5>
 </div>
 {% if user.is_authenticated %}
 <form action="{% url 'commerce:listing' listing|get_item:"title"%}" method="post">
-    {% csrf_token %}
-    {{ sendBid }}
-    <input id="submit" type="submit" value="Place Bid" name="bid">
+    <div class="form-group">
+        {% csrf_token %}
+        {{ placeBid }}
+        <input id="submit" class="btn btn-primary" type="submit" value="Place Bid" name="bid">
+    </div>
 </form>
 {% endif %}
-<div>
+<div style="margin-top:30px;">
     <h4>Details</h4>
     <ul>
         <li>Listed by NAME</li>
