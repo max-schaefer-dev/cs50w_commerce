@@ -2,11 +2,13 @@
 
 {% block body %}
 <h2>Active Listings</h2>
-<form action="{% url 'commerce:create_listing' %}" method="post">
-    <div class="form-group">
-        {% csrf_token %}
-        {{ createListing }}
-        <input id="submit" class="btn btn-primary" type="submit" value="Create Listing" name="newListing">
-    </div>
-</form>
+<div class="wrapper">
+    <form action="{% url 'commerce:create_listing' %}" method="post">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ createListing }}
+            <input id="submit" class="btn btn-primary" type="submit" value="Create Listing" name="newListing">
+        </div>
+    </form>
+</div>
 {% endblock %}

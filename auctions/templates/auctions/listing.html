@@ -3,42 +3,122 @@
 {% block body %}
 <h3>Listing: {{ listing|get_item:"title" }}</h3>
 {% if user.is_authenticated %}
-<form action="" method="post">
+{% if status == "error" %}
+<div class="alert alert-danger" role="alert">
+    <span>{{ message }}</span>
+</div>
+{% endif %}
+{% if status == "success" %}
+<div class="alert alert-success" role="alert">
+    <span>{{ message }}</span>
+</div>
+{% endif %}
+{% if listing|get_item:"status" == "closed" %}
+{% if request.user.id == highestBidder.id %}
+<div class="alert alert-success" role="alert">
+    <span><b>Congratulations!</b> The auction has beend closed and <b>you are the highest bidder!</b></span>
+</div>
+{% else %}
+<div class="alert alert-secondary" role="alert">
+    <span>The Auction has been closed. <b>Highest bider: {{ highestBidder|title }}</b></span>
+</div>
+{% endif %}
+{% endif %}
+<form style="text-align:left;" action="" method="post">
     {% csrf_token %}
     {% if watchlist == 1 %}
     <input id="removeFromWatchlist" class="btn btn-primary" type="submit" value="Remove from Watchlist">
-    <input name="watchlistAction" value="remove" type="hidden">
+    <input name="action" value="watchlist_remove" type="hidden">
     <input name="watchlistItem" value="{{ listing|get_item:"title" }}" type="hidden">
     {% else %}
     <input id="addToWatchlist" class="btn btn-primary" type="submit" value="Watchlist">
-    <input name="watchlistAction" value="add" type="hidden">
+    <input name="action" value="watchlist_add" type="hidden">
     <input name="watchlistItem" value="{{ listing|get_item:"title" }}" type="hidden">
     {% endif %}
 </form>
 {% endif %}
-<div id="listing_img">
-    <img src="{{ listing|get_item:"imageURL" }}">
-</div>
-<div>
-    <h5 style="font-weight:600">${{ listing|get_item:"bid" }}</h5>
-</div>
-{% if user.is_authenticated %}
-<form action="{% url 'commerce:listing' listing|get_item:"title"%}" method="post">
-    <div class="form-group">
-        {% csrf_token %}
-        {{ placeBid.bid }}
-        <input id="submit" class="btn btn-primary" type="submit" value="Place Bid">
-        <input name="placedTo" value="{{ listing|get_item:"title" }}" type="hidden">
-        <input name="currentBid" value="{{ listing|get_item:"bid" }}" type="hidden">
-        <input name="placedBy" value="{{ user.id }}" type="hidden">
+<div class="wrapper">
+    <div id="listing_img">
+        <img src="{{ listing|get_item:"imageURL" }}">
     </div>
-</form>
-{% endif %}
-<div style="margin-top:30px;">
-    <h4>Details</h4>
-    <ul>
-        <li>Listed by NAME</li>
-        <li>Category: {{ listing|get_item:"category" }}</li>
-    </ul>
+    <div>
+        <h5 style="font-weight:600">${{ listing|get_item:"bid" }}</h5>
+        {% if listing|get_item:"status" == "closed" %}
+        <span><b>The auction has been closed.</b></span>
+        {% endif %}
+    </div>
+    {% if user.is_authenticated and listing|get_item:"status" == "opened" %}
+    {% if listing|get_item:"status" == "closed" %}
+
+    {% endif %}
+    {% if request.user != listing|get_item:"createdBy" %}
+    <form action="{% url 'commerce:listing' listing|get_item:"title"%}" method="post">
+        <div class="form-group">
+            {% csrf_token %}
+            {{ placeBid.bid }}
+            <input id="submit" class="btn btn-primary" type="submit" value="Place Bid">
+            <input name="action" value="bid" type="hidden">
+            <input name="placedTo" value="{{ listing|get_item:"title" }}" type="hidden">
+            <input name="currentBid" value="{{ listing|get_item:"bid" }}" type="hidden">
+            <input name="placedBy" value="{{ user.id }}" type="hidden">
+        </div>
+    </form>
+    {% else %}
+    <form action="" method="post">
+        {% csrf_token %}
+        <input name="action" value="close_auction" type="hidden">
+        <input name="listingTitle" value="{{ listing|get_item:"title" }}" type="hidden">
+        <input id="close_Auction" class="btn btn-primary" type="submit" value="Close Auction">
+    </form>
+    {% endif %}
+    {% endif %}
+    <div style="margin-top:30px;">
+        <h4>Details</h4>
+        <ul>
+            <li>Listed by {{ listing|get_item:"createdBy" |title }}</li>
+            <li>Category: {{ listing|get_item:"category" }}</li>
+        </ul>
+    </div>
+    <div>
+        <h4>Comments</h4>
+        {% if user.is_authenticated and request.user != listing|get_item:"createdBy" %}
+        <p>
+            <a class="btn btn-primary" data-toggle="collapse" href="#multiCollapseExample1" role="button"
+                aria-expanded="false" aria-controls="multiCollapseExample1">Write a comment</a>
+        </p>
+        <div class="row">
+            <div class="col">
+                <div class="collapse multi-collapse" id="multiCollapseExample1">
+                    <div class="card card-body">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {{ commentForm }}
+                            <input name="action" value="comment" type="hidden">
+                            <input name="commentBy" value="{{ request.user }}" type="hidden">
+                            <input style="margin-top:10px;" class="btn btn-primary" type="submit" value="Send">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <div>
+            {% for cmmt in comments %}
+            <span>
+                {{ cmmt.commentBy|title}}
+            </span>
+            <br>
+            <b>
+                {{ cmmt.title }}
+            </b>
+            <br>
+            <span>
+                {{ cmmt.comment }}
+            </span>
+            <br>
+            <br>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 {% endblock %}

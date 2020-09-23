@@ -1,12 +1,14 @@
 body {
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 h2, h3, h4{
     font-weight:600;
 }
 .form-control{
     width:350px;
-    flex-direction:
 }
 form{
     display:flex;
@@ -16,7 +18,7 @@ form input, form textarea{
     width:550px;
 }
 input[type=submit], #id_startingBid{
-    width:100px;
+    width:min-content;
 }
 #submit{
     margin-top:20px;
@@ -79,4 +81,11 @@ input[type=submit], #id_startingBid{
     margin-left:-14px;
     line-height:initial;
     border-radius:5px;
+}
+.form-control{
+    width: 100%;
+}
+.wrapper{
+    width: 45%;
+    text-align:left;
 }
