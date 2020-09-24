@@ -7,3 +7,4 @@ from .models import Listing, User, Bid, Comment
 admin.site.register(User, UserAdmin)
 admin.site.register(Listing)
 admin.site.register(Comment)
+admin.site.register(Bid)
