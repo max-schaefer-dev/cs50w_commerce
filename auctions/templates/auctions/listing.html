@@ -1,7 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h3>Listing: {{ listing|get_item:"title" }}</h3>
+<h2>Listing: {{ listing|get_item:"title" }}</h2>
 {% if user.is_authenticated %}
 {% if status == "error" %}
 <div class="alert alert-danger" role="alert">
@@ -44,13 +44,10 @@
     <div>
         <h5 style="font-weight:600">${{ listing|get_item:"bid" }}</h5>
         {% if listing|get_item:"status" == "closed" %}
-        <span><b>The auction has been closed.</b></span>
+        <span><b>This auction has been closed.</b></span>
         {% endif %}
     </div>
     {% if user.is_authenticated and listing|get_item:"status" == "opened" %}
-    {% if listing|get_item:"status" == "closed" %}
-
-    {% endif %}
     {% if request.user != listing|get_item:"createdBy" %}
     <form action="{% url 'commerce:listing' listing|get_item:"title"%}" method="post">
         <div class="form-group">

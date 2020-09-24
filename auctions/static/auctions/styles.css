@@ -89,3 +89,11 @@ input[type=submit], #id_startingBid{
     width: 45%;
     text-align:left;
 }
+.catButton{
+    padding: 10px;
+    margin: 10px;
+    color:#fff;
+    background-color: #999;
+    border-radius:5px;
+    border:0;
+}

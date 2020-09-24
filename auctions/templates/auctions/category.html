@@ -1,25 +1,21 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<h2>Your Watchlist</h2>
-{% if watchlistLen > 0 %}
-{% for listing in watchlistItems %}
+<h2>Category: {{ category }}</h2>
+{% for listing in listings %}
 <div id="listing">
     <div id="imgOuter">
         <div style="width:100%;">
-            <img src="{{ listing.imageURL }}">
+            <img src="{{ listing|get_item:"imageURL" }}">
         </div>
     </div>
     <div id="descriptionOuter">
         <div>
             <h4><a href="{% url 'commerce:listing' listing.title %}">{{ listing.title }}</a></h4>
         </div>
-        <div><b>Price:</b> ${{ listing.bid }}</div>
-        <div>{{ listing.description }}</div>
+        <div><b>Price:</b> ${{ listing|get_item:"bid" }}</div>
+        <div>{{ listing|get_item:"description" }}</div>
     </div>
 </div>
 {% endfor %}
-{% else %}
-<h5>Nothing on your watchlist yet...</h5>
-{% endif %}
 {% endblock %}
